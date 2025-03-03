@@ -10,8 +10,8 @@ const createCar = async (req, res) => {
     await newCar.save();
 
     res.json({
-        message: "Pessoa criada com sucesso!",
-        person: newCar
+        message: "Car created successfully!",
+        car: newCar
     })
 }
 
@@ -20,4 +20,11 @@ const getAllCars = async (req, res) => {
     res.json(car)
 }
 
-module.exports = {createCar, getAllCars}
+const deleteCarId = async (req, res) => {
+    const { id } = req.params;
+
+    await Car.deleteOne({ _id: id })
+    res.json({ message: "Car removed successfully!" })
+}
+
+module.exports = { createCar, getAllCars, deleteCarId }

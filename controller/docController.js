@@ -17,7 +17,7 @@ const createDoc = async (req, res) => {
     )
 
     res.json({
-        message: "Document created successfully",
+        message: "Document created successfully!",
         doc: newDoc
     })
 }
@@ -27,4 +27,11 @@ const getAllDocs = async (req, res) => {
     res.json(docs)
 }
 
-module.exports = { createDoc, getAllDocs}
+const deleteDocId = async(req, res) => {
+    const { id } = req.params
+    
+    await Doc.deleteOne({_id: id})
+    res.json({message: "Doc removed successfully!"})
+}
+
+module.exports = { createDoc, getAllDocs, deleteDocId }
