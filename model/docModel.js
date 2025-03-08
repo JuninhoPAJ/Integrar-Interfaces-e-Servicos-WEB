@@ -1,8 +1,8 @@
-let mongoose = require("mongoose")
+const mongoose = require("mongoose");
 
-let docSchema = new mongoose.Schema({
-    expirationDate: String,
+const docSchema = new mongoose.Schema({
+    expirationDate: { type: String, required: true },
     car: { type: mongoose.Schema.Types.ObjectId, ref: "Car", unique: true }
-})
+});
 
-module.exports = mongoose.model("Doc", docSchema)
+module.exports = mongoose.model("Doc", docSchema);

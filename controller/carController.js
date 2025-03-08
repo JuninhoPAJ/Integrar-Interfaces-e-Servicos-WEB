@@ -1,23 +1,40 @@
 const Car = require("../model/carModel.js")
+const Accessory = require("../model/accessoryModel.js")
 
 const createCar = async (req, res) => {
-    const { name } = req.body;
+    try {
+        const { name, accessoryId } = req.body;
 
-    const newCar = new Car({
-        name
-    })
+        const newCar = new Car({
+            name,
+            accessory: accessoryId
+        });
 
-    await newCar.save();
+        await newCar.save();
 
-    res.json({
-        message: "Car created successfully!",
-        car: newCar
-    })
+        if (accessoryId && accessoryId.length > 0) {
+            await Accessory.updateMany(
+                { _id: { $in: accessoryId } },
+                { $push: { car: newCar._id } }
+            );
+        }
+
+        res.json({
+            message: "Car created successfully!",
+            car: newCar
+        });
+    } catch (error) {
+        res.status(500).json({ message: "Error creating car", error });
+    }
 }
 
 const getAllCars = async (req, res) => {
-    const car = await Car.find().populate('doc')
-    res.json(car)
+    try {
+        const cars = await Car.find().populate('doc').populate('accessory', 'name').select('name accessory');
+        res.json(cars);
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching cars", error });
+    }
 }
 
 const deleteCarId = async (req, res) => {
