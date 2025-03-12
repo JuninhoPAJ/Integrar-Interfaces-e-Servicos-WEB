@@ -49,4 +49,29 @@ const getAllAccessories = async (req, res) => {
     }
 }
 
-module.exports = { createAccessory, getAllAccessories };
+const deleteAccessory = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Verifica se o acessório existe
+        const accessory = await Accessory.findById(id);
+        if (!accessory) {
+            return res.status(404).json({ message: "Accessory not found" });
+        }
+
+        // Remove a referência do acessório dos carros que o possuem
+        await Car.updateMany(
+            { accessory: id },
+            { $pull: { accessory: id } }
+        );
+
+        // Deleta o acessório do banco de dados
+        await Accessory.findByIdAndDelete(id);
+
+        res.json({ message: "Accessory removed successfully!" });
+    } catch (error) {
+        res.status(500).json({ message: "Error deleting accessory", error });
+    }
+};
+
+module.exports = { createAccessory, getAllAccessories, deleteAccessory };

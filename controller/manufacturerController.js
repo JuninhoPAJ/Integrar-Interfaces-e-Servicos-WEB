@@ -49,4 +49,29 @@ const getAllManufacturers = async (req, res) => {
     }
 };
 
-module.exports = { createManufacturer, getAllManufacturers };
+const deleteManufacturer = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Verifica se o Manufacturer existe
+        const manufacturer = await Manufacturer.findById(id);
+        if (!manufacturer) {
+            return res.status(404).json({ message: "Manufacturer not found" });
+        }
+
+        // Remove a referência do Manufacturer dos carros associados
+        await Car.updateMany(
+            { manufacturer: id },
+            { $unset: { manufacturer: "" } }
+        );
+
+        // Deleta o Manufacturer
+        await Manufacturer.findByIdAndDelete(id);
+
+        res.json({ message: "Manufacturer deleted successfully!" });
+    } catch (error) {
+        res.status(500).json({ message: "Error deleting manufacturer", error });
+    }
+};
+
+module.exports = { createManufacturer, getAllManufacturers, deleteManufacturer };
