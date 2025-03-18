@@ -6,7 +6,7 @@ const createDoc = async (req, res) => {
         const { expirationDate, carId } = req.body;
 
         if (!carId) {
-            return res.status(400).json({ message: "Car ID is required" });
+            return res.status(400).json({ message: "CarId is required" });
         }
 
         const newDoc = new Doc({
@@ -15,6 +15,11 @@ const createDoc = async (req, res) => {
         });
 
         await newDoc.save();
+
+        await Doc.updateOne(
+            { _id: newDoc._id },
+            { $set: { car: carId } }
+        );
 
         await Car.updateOne(
             { _id: carId },
@@ -61,4 +66,46 @@ const deleteDocId = async (req, res) => {
     }
 };
 
-module.exports = { createDoc, getAllDocs, deleteDocId };
+const editDoc = async (req, res) => {
+    try {
+        const { id } = req.params;  // O ID do documento a ser editado
+        const { expirationDate, carId } = req.body;  // Os novos valores para a data de expiração e o carro
+
+        // Verifica se o documento existe
+        const doc = await Doc.findById(id);
+        if (!doc) {
+            return res.status(404).json({ message: "Document not found" });
+        }
+
+        // Atualiza a data de expiração do documento se fornecida
+        if (expirationDate) {
+            doc.expirationDate = expirationDate;
+        }
+
+        // Atualiza o carro associado ao documento, se fornecido
+        if (carId) {
+            // Atualiza a referência do carro no documento
+            doc.car = carId;
+        }
+
+        // Salva as alterações do documento
+        await doc.save();
+
+        // Atualiza o carro para refletir a alteração (associando o novo documento ao carro)
+        if (carId) {
+            await Car.updateOne(
+                { _id: carId },
+                { $set: { doc: doc._id } }
+            );
+        }
+
+        res.json({
+            message: "Document updated successfully!",
+            doc
+        });
+    } catch (error) {
+        res.status(500).json({ message: "Error updating document", error });
+    }
+};
+
+module.exports = { createDoc, getAllDocs, deleteDocId, editDoc };

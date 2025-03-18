@@ -74,4 +74,46 @@ const deleteManufacturer = async (req, res) => {
     }
 };
 
-module.exports = { createManufacturer, getAllManufacturers, deleteManufacturer };
+const editManufacturer = async (req, res) => {
+    try {
+        const { id } = req.params;  // O ID do fabricante a ser editado
+        const { name, carId } = req.body;  // Os novos valores para nome e carros
+
+        // Verifica se o fabricante existe
+        const manufacturer = await Manufacturer.findById(id);
+        if (!manufacturer) {
+            return res.status(404).json({ message: "Manufacturer not found" });
+        }
+
+        // Atualiza o nome do fabricante se fornecido
+        if (name) {
+            manufacturer.name = name;
+        }
+
+        // Atualiza os carros associados ao fabricante, se fornecido
+        if (carId && carId.length > 0) {
+            // Substitui a lista de carros, se novos carros forem fornecidos
+            manufacturer.car = carId;
+        }
+
+        // Salva as alterações do fabricante
+        await manufacturer.save();
+
+        // Atualiza os carros para refletir a alteração (associando o novo fabricante ao carro)
+        if (carId && carId.length > 0) {
+            await Car.updateMany(
+                { _id: { $in: carId } },
+                { $set: { manufacturer: manufacturer._id } }
+            );
+        }
+
+        res.json({
+            message: "Manufacturer updated successfully!",
+            manufacturer
+        });
+    } catch (error) {
+        res.status(500).json({ message: "Error updating manufacturer", error });
+    }
+};
+
+module.exports = { createManufacturer, getAllManufacturers, deleteManufacturer, editManufacturer };
