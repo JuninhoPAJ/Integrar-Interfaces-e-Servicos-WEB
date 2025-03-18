@@ -1,14 +1,16 @@
 const Car = require("../model/carModel.js")
 const Doc = require("../model/docModel.js")
+const Manufacturer = require("../model/manufacturerModel.js")
 const Accessory = require("../model/accessoryModel.js")
 
 const createCar = async (req, res) => {
     try {
-        const { name, docId, accessoryId } = req.body;
+        const { name, docId, manufacturerId, accessoryId } = req.body;
 
         const newCar = new Car({
             name,
             doc: docId,
+            manufacturer: manufacturerId,
             accessory: accessoryId
         });
 
@@ -32,7 +34,7 @@ const createCar = async (req, res) => {
 
 const getAllCars = async (req, res) => {
     try {
-        const cars = await Car.find().populate('doc').populate('accessory', 'name').select('name accessory');
+        const cars = await Car.find().populate('doc').populate('manufacturer').populate('accessory', 'name').select('name accessory');
         res.json(cars);
     } catch (error) {
         res.status(500).json({ message: "Error fetching cars", error });
