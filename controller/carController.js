@@ -114,6 +114,4 @@ const editCar = async (req, res) => {
   }
 };
 
-
-
 module.exports = { createCar, getAllCars, deleteCarId, editCar }
