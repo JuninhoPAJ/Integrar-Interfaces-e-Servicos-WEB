@@ -47,7 +47,7 @@ const createCar = async (req, res) => {
 
 const getAllCars = async (req, res) => {
     try {
-        const cars = await Car.find().populate('doc').populate('accessory', 'name').select('name accessory image');
+        const cars = await Car.find().populate('doc', 'expirationDate').populate('accessory', 'name').select('name accessory image expirationDate');
         res.json(cars);
     } catch (error) {
         res.status(500).json({ message: "Error fetching cars", error });
